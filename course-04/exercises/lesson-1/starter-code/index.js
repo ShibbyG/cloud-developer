@@ -43,7 +43,7 @@ exports.handler = async (event) => {
           }
         ],
         Unit: 'Count',
-        Value: requestWasSuccessful
+        Value: (requestWasSuccessful) ? 1 : 0
       }
     ],
     Namespace: 'Udacity/Serveless'
