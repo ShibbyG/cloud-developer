@@ -37,6 +37,8 @@ provider:
       Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.IMAGES_TABLE}/index/${self:provider.environment.IMAGE_ID_INDEX}
 
 custom:
+  webpack:
+    includeModules: true
   documentation:
     api:
       info:
@@ -87,15 +89,15 @@ functions:
     handler: src/lambda/http/createImage.handler
     events:
       - http:
-        method: post
-        path: groups/{groupId}/images
-        cors: true
-        reqValidatorName: RequestBodyValidator
-        documentation:
-          summary: Create a new image
-          description: Create a new image
-          requestModels:
-            'application/json': ImageRequest
+          method: post
+          path: groups/{groupId}/images
+          cors: true
+          reqValidatorName: RequestBodyValidator
+          documentation:
+            summary: Create a new image
+            description: Create a new image
+            requestModels:
+              'application/json': ImageRequest
 
 
 
