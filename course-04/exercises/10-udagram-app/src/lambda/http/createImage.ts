@@ -5,8 +5,14 @@ import * as uuid from 'uuid'
 
 const docClient = new AWS.DynamoDB.DocumentClient()
 
-const groupsTable = process.env.GROUPS_TABLE
-const imagesTable = process.env.IMAGES_TABLE
+const s3 = new AWS.S3({
+  signatureVersion: 'v4'
+});
+
+const groupsTable = process.env.GROUPS_TABLE;
+const imagesTable = process.env.IMAGES_TABLE;
+const bucketName = process.env.IMAGES_S3_BUCKET;
+const urlExpiration = parseInt(process.env.SIGNED_URL_EXPIRATION);
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   console.log('Caller event', event)
@@ -27,11 +33,14 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   
   const parsedBody = JSON.parse(event.body)
 
+  const imageId = uuid.v4();
+
   const newItem = {
     ...parsedBody,
     groupId: groupId,
-    imageId: uuid.v4(),
+    imageId: imageId,
     timestamp: new Date().toISOString(),
+    imageUrl: `https://${bucketName}.s3.amazonaws.com/${imageId}`
   }
 
   await docClient.put({
@@ -39,13 +48,16 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     Item: newItem
   }).promise();
 
+  const url = getUploadUrl(imageId);
+
   return {
     statusCode: 201,
     headers: {
       'Access-Control-Allow-Origin': '*'
     },
     body: JSON.stringify({
-      newItem
+      newItem,
+      uploadUrl: url
     })
   }
 }
@@ -62,4 +74,12 @@ async function groupExists(groupId: string) {
 
   console.log('Get group: ', result)
   return !!result.Item
+}
+
+function getUploadUrl(imageId: string) {
+  return s3.getSignedUrl('putObject', {
+    Bucket: bucketName,
+    Key: imageId,
+    Expires: urlExpiration
+  })
 }
