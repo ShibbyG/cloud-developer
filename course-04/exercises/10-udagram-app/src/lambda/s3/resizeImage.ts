@@ -32,7 +32,7 @@ async function processImage(record: S3EventRecord) {
         })
         .promise();
 
-    const body: Buffer = response.Body;
+    const body = response.Body;
 
     // Read an image with the Jimp library
     const image = await Jimp.read(body);
