@@ -21,7 +21,7 @@ provider:
     IMAGE_ID_INDEX: ImageIdIndex
     IMAGES_S3_BUCKET: serverless-udagram-images-677795121369-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
-    THUMBNAILS_S3_BUCKET: serverless-udagram-thumbnail-${self:provider.stage}
+    THUMBNAILS_S3_BUCKET: serverless-udagram-thumbnail-677795121369-${self:provider.stage}
 
   iamRoleStatements:
     - Effect: Allow
@@ -138,6 +138,16 @@ functions:
 
   ResizeImage:
     handler: src/lambda/s3/resizeImage.handler
+    events:
+      - sns:
+          arn:
+            Fn::Join:
+              - ':'
+              - - arn:aws:sns
+                - Ref: AWS::Region
+                - Ref: AWS::AccountId
+                - ${self:custom.topicName}
+          topicName: ${self:custom.topicName}
 
   ConnectHandler:
     handler: src/lambda/websocket/connect.handler
