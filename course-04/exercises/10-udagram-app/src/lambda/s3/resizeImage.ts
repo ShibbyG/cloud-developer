@@ -1,4 +1,4 @@
-import { SNSEvent, SNSHandler, S3EventRecord } from 'aws-lambda
+import { SNSEvent, SNSHandler, S3EventRecord } from 'aws-lambda'
 import 'source-map-support/register'
 import * as AWS from 'aws-sdk'
 import Jimp from 'jimp/es'
